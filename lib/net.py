@@ -1,5 +1,5 @@
 import socket
-IP_ADDR = '192.168.2.128'
+IP_ADDR = '192.168.2.55'
 
 class Receiver:
     """ Joins a Multicast Group
@@ -21,11 +21,21 @@ class Receiver:
         host = IP_ADDR # We need a utility to get the interface address (netifaces)
 
         # sets the join address to the "host" var
-        self.rsock.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(host))
-        membership_request = socket.inet_aton(self._MCAST_GRP) + socket.inet_aton(IP_ADDR)
-        self.rsock.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership_request)
+        self.rsock.setsockopt(socket.SOL_IP, 
+                              socket.IP_MULTICAST_IF, 
+                              socket.inet_aton(host))
 
+        membership_request = socket.inet_aton(self._MCAST_GRP) + socket.inet_aton(IP_ADDR)
+        self.rsock.setsockopt(socket.IPPROTO_IP, 
+                              socket.IP_ADD_MEMBERSHIP, 
+                              membership_request)
+
+
+    def start(self):
         self.rsock.bind((self._MCAST_GRP, self._MCAST_PORT))
+
+    def stop(self):
+        self.rsock.close()
 
 
 class Sender:
