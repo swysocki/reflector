@@ -1,5 +1,21 @@
-import socket
-IP_ADDR = '192.168.2.55'
+import socket, os
+
+def get_ip_addr():
+    """ Retrieves Interface IPv4 Address
+    
+    Uses an Linux-specific OS call to parse the IP address.  Creates a list of
+    strings if multiple interfaces are present.  Currently only uses the first
+    address found.  This only works on systems with interfaces prefixed with
+    'ethX' e.g. Debian
+    
+    returns:
+        ips[0] (str): a string representing the first IPv4 address found
+
+    """
+    out = os.popen("ip a s | grep 'inet.*eth[0-99]' | cut -f6 -d' ' | sed 's/\/.*//'")
+    ips = out.read().split()
+    return ips[0]
+    
 
 class Receiver:
     """ Joins a Multicast Group
@@ -17,19 +33,18 @@ class Receiver:
         self._MCAST_GRP = group
         self._MCAST_PORT = port
         self.rsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-            
-        host = IP_ADDR # We need a utility to get the interface address (netifaces)
+       
+        host = get_ip_addr()
 
         # sets the join address to the "host" var
         self.rsock.setsockopt(socket.SOL_IP, 
                               socket.IP_MULTICAST_IF, 
                               socket.inet_aton(host))
 
-        membership_request = socket.inet_aton(self._MCAST_GRP) + socket.inet_aton(IP_ADDR)
+        membership_request = socket.inet_aton(self._MCAST_GRP) + socket.inet_aton(host)
         self.rsock.setsockopt(socket.IPPROTO_IP, 
                               socket.IP_ADD_MEMBERSHIP, 
                               membership_request)
-
 
     def start(self):
         self.rsock.bind((self._MCAST_GRP, self._MCAST_PORT))
