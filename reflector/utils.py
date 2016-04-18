@@ -74,6 +74,8 @@ class Sender:
                                    socket.IPPROTO_UDP)
                                    
     def send(self, data):
-        print('Sent %s bytes of data' % len(data))
         self.ssock.sendto(data, (self._UCAST_ADDR, self._UCAST_PORT))
+    
+    def stop(self):
+        self.ssock.close()
 

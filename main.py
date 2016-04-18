@@ -1,5 +1,5 @@
-import argparse
-from lib import net
+import argparse, sys
+from reflector import utils
 
 def get_opts():
     parser = argparse.ArgumentParser()
@@ -10,20 +10,22 @@ def get_opts():
 
     return parser.parse_args()
     
-def get_mcast_socket(options):
-    return net.Receiver(options.mcast_addr, options.mcast_port) 
-
-def get_ucast_socket(options):
-    return net.Sender(options.ucast_addr, options.ucast_port)
-
 if __name__ == '__main__':
     options = get_opts()
 
-    recv_mcast = get_mcast_socket(options) 
-    send_ucast = get_ucast_socket(options)
+    recv_mcast = utils.Receiver(options.mcast_addr, options.mcast_port)
+    send_ucast = utils.Sender(options.ucast_addr, options.ucast_port)
     recv_mcast.start()
 
-    while True:
-        data, address = recv_mcast.rsock.recvfrom(65536)
-        print("% sent %s" % (address, len(data)))
-        send_ucast.send(data)
+    try:
+        while True:
+            data, address = recv_mcast.rsock.recvfrom(65536)
+            print("% sent %s" % (address, len(data)))
+            send_ucast.send(data)
+    except KeyboardInterrupt:
+        print('\nClosing Sockets')
+    finally:
+        send_ucast.stop()
+        recv_mcast.stop()
+        sys.exit(0)
+       
