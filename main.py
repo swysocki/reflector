@@ -20,7 +20,7 @@ if __name__ == '__main__':
     try:
         while True:
             data = recv_mcast.receive()
-            print("% data received" % recv_mcast.count)
+            print("%d data received" % recv_mcast.count)
             send_ucast.send(data)
     except KeyboardInterrupt:
         print('\nClosing Sockets')
