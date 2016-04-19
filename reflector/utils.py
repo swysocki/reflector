@@ -23,20 +23,22 @@ class Receiver:
     Receiver joins a specified Multicast Group with the intention of reflecting the
     traffic to a unicast address.
 
-    Params:
-        group (str): a dotted decimal (IPv4) address of the multicast group to
+    Properties:
+        _MCAST_GRP (str): a dotted decimal (IPv4) address of the multicast group to
         join
-        port (int): an integer representing the multicast port number
-
+        _MCAST_PORT (int): an integer representing the multicast port number
+        count (int): bytes received on socket
+        rsock (obj): Python socket object
+        
     """
     def __init__(self, group, port):
         self._MCAST_GRP = group
         self._MCAST_PORT = port
+        self.count = 0
         self.rsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
        
         host = get_ip_addr()
 
-        # sets the join address to the "host" var
         self.rsock.setsockopt(socket.SOL_IP, 
                               socket.IP_MULTICAST_IF, 
                               socket.inet_aton(host))
@@ -49,6 +51,11 @@ class Receiver:
     def start(self):
         self.rsock.bind((self._MCAST_GRP, self._MCAST_PORT))
 
+    def receive(self):
+        data, address = self.rsock.recvfrom(65536)
+        self.count += len(data)
+        return data
+        
     def stop(self):
         self.rsock.close()
 
