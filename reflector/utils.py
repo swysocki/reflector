@@ -68,9 +68,11 @@ class Sender:
     sending any incoming bytes to the destination address
 
     Params:
-        addr (str): a dotted decimal (IPv4) addres of the unicast
+        _UCAST_ADDR (str): a dotted decimal (IPv4) addres of the unicast
         destiation
-        port (int): an integer representing the unicast port number
+        _UCAST_PORT (int): an integer representing the unicast port number
+        count (int): bytes sent on socket
+        ssock (obj): Python unicast socket object
 
     """ 
     def __init__(self, address, port):
@@ -79,10 +81,12 @@ class Sender:
         self.ssock = socket.socket(socket.AF_INET, 
                                    socket.SOCK_DGRAM,
                                    socket.IPPROTO_UDP)
-                                   
+        self.count = 0
+
     def send(self, data):
         self.ssock.sendto(data, (self._UCAST_ADDR, self._UCAST_PORT))
-    
+        self.count += len(data)
+
     def stop(self):
         self.ssock.close()
 
