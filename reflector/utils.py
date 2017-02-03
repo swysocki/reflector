@@ -45,8 +45,7 @@ class Receiver:
                               socket.IP_MULTICAST_IF, 
                               socket.inet_aton(host))
 
-        membership_request = socket.inet_aton(self._MCAST_GRP) + 
-                                    socket.inet_aton(host)
+        membership_request = socket.inet_aton(self._MCAST_GRP) + socket.inet_aton(host)
         self.rsock.setsockopt(socket.IPPROTO_IP, 
                               socket.IP_ADD_MEMBERSHIP, 
                               membership_request)
