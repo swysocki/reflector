@@ -1,6 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$sender_script = <<SCRIPT
+ip route add 239.5.5.5 dev eth1
+apt-get install iperf
+SCRIPT
+
+
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
@@ -15,18 +21,21 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/trusty64"
 
   config.vm.define "sender" do |sender|
-    config.vm.hostname = "sender-199-5"
-    config.vm.network "private_network", ip: "192.168.199.5"
+    sender.vm.hostname = "sender-199-5"
+    sender.vm.network "private_network", ip: "192.168.199.5"
+    sender.vm.provision "shell",
+      run: "always",
+      inline: $sender_script 
   end
 
   config.vm.define "reflector" do |reflector|
-    config.vm.hostname = "reflector-199-6"
-    config.vm.network "private_network", ip: "192.168.199.6"
+    reflector.vm.hostname = "reflector-199-6"
+    reflector.vm.network "private_network", ip: "192.168.199.6"
   end
   
   config.vm.define "receiver" do |receiver|
-    config.vm.hostname = "receiver-199-7"  
-    config.vm.network "private_network", ip: "192.168.199.7"
+    receiver.vm.hostname = "receiver-199-7"  
+    receiver.vm.network "private_network", ip: "192.168.199.7"
   end
 
   # Disable automatic box update checking. If you disable this, then
