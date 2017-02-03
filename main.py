@@ -1,4 +1,4 @@
-adflkjmport argparse, sys
+import argparse, sys
 from reflector import utils
 
 def get_opts():
