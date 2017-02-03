@@ -1,4 +1,4 @@
-import argparse, sys
+adflkjmport argparse, sys
 from reflector import utils
 
 def get_opts():
@@ -20,7 +20,8 @@ if __name__ == '__main__':
     try:
         while True:
             data = recv_mcast.receive()
-            print('%d bytes RX : %d bytes TX' % (recv_mcast.count, send_ucast.count), end='\r')
+            print('%d bytes RX : %d bytes TX' % (recv_mcast.count, 
+                                                send_ucast.count), end='\r')
             send_ucast.send(data)
     except KeyboardInterrupt:
         print('\nClosing Sockets')
