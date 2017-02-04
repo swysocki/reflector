@@ -18,7 +18,6 @@ def get_ip_addr(interface=None):
     else:
         command = "ip -o -4 addr show dev " + interface + " | awk -F '[ /]+' '/global/ {print $4}'"
         out = os.popen(command)
-        print(out.read)
         ip = out.read().split()
     return ip[0]
 
