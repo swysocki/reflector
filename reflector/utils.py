@@ -1,53 +1,62 @@
 import socket, os
 
-def get_ip_addr():
+def get_ip_addr(interface=None):
     """ Retrieves Interface IPv4 Address
-    
+
     Uses an Linux-specific OS call to parse the IP address.  Creates a list of
     strings if multiple interfaces are present.  Currently only uses the first
     address found.  This only works on systems with interfaces prefixed with
     'ethX' e.g. Debian
-    
+
     returns:
         ips[0] (str): a string representing the first IPv4 address found
 
     """
-    out = os.popen("ip a s | grep 'inet.*eth[0-99]' | cut -f6 -d' ' | sed 's/\/.*//'")
-    ips = out.read().split()
-    return ips[0]
-    
+    if not interface:
+        out = os.popen("ip a s | grep 'inet.*eth[0-99]' | cut -f6 -d' ' | sed 's/\/.*//'")
+        ip = out.read().split()
+    else:
+        command = "ip -o -4 addr show dev " + interface + " | awk -F '[ /]+' '/global/ {print $4}'"
+        out = os.popen(command)
+        print(out.read)
+        ip = out.read().split()
+    return ip[0]
 
-class Receiver:
+class Receiver(object):
     """ Joins a Multicast Group
 
-    Receiver joins a specified Multicast Group with the intention of reflecting 
+    Receiver joins a specified Multicast Group with the intention of reflecting
     the traffic to a unicast address.
 
     Properties:
-        _MCAST_GRP (str): a dotted decimal (IPv4) address of the multicast 
+        _MCAST_GRP (str): a dotted decimal (IPv4) address of the multicast
             group to join
         _MCAST_PORT (int): an integer representing the multicast port number
         count (int): bytes received on socket
         rsock (obj): Python socket object
-        
+
     """
-    def __init__(self, group, port):
+    def __init__(self, group, port, iface=None):
         self._MCAST_GRP = group
         self._MCAST_PORT = port
+        self._IFACE = iface
         self.count = 0
-        self.rsock = socket.socket(socket.AF_INET, 
-                                   socket.SOCK_DGRAM, 
+        self.rsock = socket.socket(socket.AF_INET,
+                                   socket.SOCK_DGRAM,
                                    socket.IPPROTO_UDP)
-       
-        host = get_ip_addr()
 
-        self.rsock.setsockopt(socket.SOL_IP, 
-                              socket.IP_MULTICAST_IF, 
+        if not self._IFACE:
+            host = get_ip_addr()
+        else:
+            get_ip_addr(self._IFACE)
+
+        self.rsock.setsockopt(socket.SOL_IP,
+                              socket.IP_MULTICAST_IF,
                               socket.inet_aton(host))
 
         membership_request = socket.inet_aton(self._MCAST_GRP) + socket.inet_aton(host)
-        self.rsock.setsockopt(socket.IPPROTO_IP, 
-                              socket.IP_ADD_MEMBERSHIP, 
+        self.rsock.setsockopt(socket.IPPROTO_IP,
+                              socket.IP_ADD_MEMBERSHIP,
                               membership_request)
 
     def start(self):
@@ -57,7 +66,7 @@ class Receiver:
         data, address = self.rsock.recvfrom(65536)
         self.count += len(data)
         return data
-        
+
     def stop(self):
         self.rsock.close()
 
