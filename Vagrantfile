@@ -1,11 +1,6 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-$sender_script = <<SCRIPT
-ip route add 239.5.5.5 dev eth1
-apt-get install iperf
-SCRIPT
-
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
 # configures the configuration version (we support older styles for
@@ -23,9 +18,13 @@ Vagrant.configure("2") do |config|
   config.vm.define "sender" do |sender|
     sender.vm.hostname = "sender-199-5"
     sender.vm.network "private_network", ip: "192.168.199.5"
-    sender.vm.provision "shell",
-      run: "always",
-      inline: $sender_script 
+    sender.vm.synced_folder "salt/roots", "/srv/salt"
+    sender.vm.provision :salt do |salt|
+      salt.masterless = true
+      salt.minion_config = "salt/minion"
+      salt.run_highstate = true
+      salt.verbose = true
+    end
   end
 
   config.vm.define "reflector" do |reflector|
