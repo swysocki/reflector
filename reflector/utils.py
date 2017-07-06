@@ -47,7 +47,7 @@ class Receiver(object):
         if not self._IFACE:
             host = get_ip_addr()
         else:
-            get_ip_addr(self._IFACE)
+            host = get_ip_addr(self._IFACE)
 
         self.rsock.setsockopt(socket.SOL_IP,
                               socket.IP_MULTICAST_IF,
@@ -84,7 +84,7 @@ class Sender:
         count (int): bytes sent on socket
         ssock (obj): Python unicast socket object
 
-    """ 
+    """
     def __init__(self, address, port):
         self._UCAST_ADDR = address
         self._UCAST_PORT = port

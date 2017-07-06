@@ -7,13 +7,14 @@ def get_opts():
     parser.add_argument('mcast_port', help='Multicast port', type=int)
     parser.add_argument('ucast_addr', help='Unicast address to send to')
     parser.add_argument('ucast_port', help='Unicast port', type=int)
+    parser.add_argument('-i', '--interface', help='Interface to receive multicast on')
 
     return parser.parse_args()
     
 if __name__ == '__main__':
     options = get_opts()
 
-    recv_mcast = utils.Receiver(options.mcast_addr, options.mcast_port)
+    recv_mcast = utils.Receiver(options.mcast_addr, options.mcast_port, options.interface)
     send_ucast = utils.Sender(options.ucast_addr, options.ucast_port)
     recv_mcast.start()
 
